@@ -1,8 +1,10 @@
+import 'package:cryptography/cryptography.dart';
 import 'package:flutter/material.dart';
 import 'package:jose/jose.dart';
 
 Future<void> main() async {
   /*----------------------Create a JWE----------------------------*/
+  print('---------------TEST WHIT jose package--------------------');
   // create a builder
   var builder = JsonWebEncryptionBuilder();
 
@@ -12,8 +14,6 @@ Future<void> main() async {
 
   // set some protected header
   // builder.setProtectedHeader("createdAt", DateTime.now().toIso8601String());
-
-  print(' HEADER ${builder.protectedHeader}');
 
   // add a key to encrypt the Content Encryption Key
   var jwkTest = JsonWebKey.generate('A256GCM');
@@ -62,4 +62,29 @@ Future<void> main() async {
   // decrypt the payload
   var payload = await jwe2.getPayload(keyStore);
   print("decrypted content: ${payload.stringContent}");
+
+  /////////////////////////////////////////////////////////////////////////////
+  print('---------------TEST WHIT cryptography package--------------------');
+  final message = <int>[1, 2, 3];
+
+  final algorithm = AesGcm.with128bits();
+  final secretKey = await algorithm.newSecretKey();
+  final nonce = algorithm.newNonce();
+
+  // Encrypt
+  final secretBox = await algorithm.encrypt(
+    message,
+    secretKey: secretKey,
+    nonce: nonce,
+  );
+  print('Nonce: ${secretBox.nonce}');
+  print('Ciphertext: ${secretBox.cipherText}');
+  print('MAC: ${secretBox.mac.bytes}');
+
+  // Decrypt
+  final clearText = await algorithm.encrypt(
+    secretBox.cipherText,
+    secretKey: secretKey,
+  );
+  print('Cleartext: $clearText');
 }
