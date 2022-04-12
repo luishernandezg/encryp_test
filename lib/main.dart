@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:cryptography/cryptography.dart';
 import 'package:flutter/material.dart';
 import 'package:jose/jose.dart';
@@ -10,19 +12,19 @@ Future<void> main() async {
 
   // set the content
   builder.stringContent = "Hello world!";
-  builder.protectedHeader;
 
   // set some protected header
   // builder.setProtectedHeader("createdAt", DateTime.now().toIso8601String());
 
   // add a key to encrypt the Content Encryption Key
-  var jwkTest = JsonWebKey.generate('A256GCM');
+  var jwkTest = JsonWebKey.generate('A128CBC-HS256');
+  var jwk2 = JsonWebKey.symmetric(key: BigInt.parse("1234567891234567"));
 
   var jwk = JsonWebKey.fromJson(
     {
       "kty": "oct",
-      "k": "12345678912345678912345678912345",
-      "alg": "A256GCM",
+      "k": "MTIzNDU2Nzg5MTIzNDU2Nzg5MTIzNDU2Nzg5MTIzNDU=",
+      "alg": "A128CBC-HS256",
       "use": "enc",
       "keyOperations": ['encrypt', 'decrypt'],
     },
@@ -36,7 +38,7 @@ Future<void> main() async {
   builder.addRecipient(jwk, algorithm: "dir");
 
   // set the content encryption algorithm to use
-  builder.encryptionAlgorithm = "A256GCM";
+  builder.encryptionAlgorithm = "A128CBC-HS256";
 
   // build the jws
   var jwe = builder.build();
@@ -65,9 +67,9 @@ Future<void> main() async {
 
   /////////////////////////////////////////////////////////////////////////////
   print('---------------TEST WHIT cryptography package--------------------');
-  final message = <int>[1, 2, 3];
+  final message = utf8.encode('Hello encryption!');
 
-  final algorithm = AesGcm.with128bits();
+  final algorithm = AesGcm.with256bits();
   final secretKey = await algorithm.newSecretKey();
   final nonce = algorithm.newNonce();
 
@@ -82,9 +84,9 @@ Future<void> main() async {
   print('MAC: ${secretBox.mac.bytes}');
 
   // Decrypt
-  final clearText = await algorithm.encrypt(
-    secretBox.cipherText,
+  final clearText = await algorithm.decrypt(
+    secretBox,
     secretKey: secretKey,
   );
-  print('Cleartext: $clearText');
+  print('Cleartext: ${utf8.decode(clearText)}');
 }
