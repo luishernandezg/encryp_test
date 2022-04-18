@@ -11,13 +11,13 @@ Future<void> main() async {
   var builder = JsonWebEncryptionBuilder();
 
   // set the content
-  builder.stringContent = "Hello world!";
+  builder.stringContent = "Hello worjtyjjkgld!";
 
   // set some protected header
   // builder.setProtectedHeader("createdAt", DateTime.now().toIso8601String());
 
   // add a key to encrypt the Content Encryption Key
-  var jwkTest = JsonWebKey.generate('A128CBC-HS256');
+  var jwkTest = JsonWebKey.generate('A256CBC-HS512');
   var jwk2 = JsonWebKey.symmetric(key: BigInt.parse("1234567891234567"));
 
   var jwk = JsonWebKey.fromJson(
@@ -29,6 +29,13 @@ Future<void> main() async {
       "keyOperations": ['encrypt', 'decrypt'],
     },
   );
+
+  var str = utf8.encode("12345678912345678912345678912345");
+  String bs4str = base64.encode(str);
+
+  print("bs4str: " + bs4str);
+
+  // base
 
   print("jwkTest: $jwkTest");
   print("jwk: $jwk");
@@ -54,7 +61,9 @@ Future<void> main() async {
 
   /*----------------------Decode and decrypt a JWE----------------------------*/
 
-  var encoded = jwe.toCompactSerialization();
+  // var encoded = jwe.toCompactSerialization();
+  var encoded =
+      "eyJlbmMiOiJBMTI4Q0JDLUhTMjU2IiwiYWxnIjoiZGlyIn0..6XJVyelBGt0slhHYqObruQ.W4KQ9hD8KjAoa78GTBwHrw.-gy-cN5uX5w-8g8Y63P0CA";
 
   // create a JsonWebEncryption from the encoded string
   var jwe2 = JsonWebEncryption.fromCompactSerialization(encoded);
